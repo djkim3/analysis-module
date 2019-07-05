@@ -3,6 +3,7 @@
 #   - If you want to know total number of gpu, than use GPUtil and GPUtil.getGPUs()
 
 DEBUG = True
+PROFILE = True
 
 TOTAL_NUMBER_OF_MODULES = 2
 

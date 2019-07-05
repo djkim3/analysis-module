@@ -5,9 +5,10 @@ from django.db import models
 
 # Create your models here.
 from rest_framework import exceptions
-from AnalysisModule.config import DEBUG
+from AnalysisModule.config import DEBUG, PROFILE
 from WebAnalyzer.tasks import analyzer_by_path
 from WebAnalyzer.utils import filename
+from Profile.timer import start_time, end_time
 import ast
 
 
@@ -16,17 +17,35 @@ class ImageModel(models.Model):
     token = models.AutoField(primary_key=True)
     uploaded_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
+    model_execute_time = models.FloatField(null=True, unique=False)
+    db_save_time = models.FloatField(null=True, unique=False)
 
     def save(self, *args, **kwargs):
         super(ImageModel, self).save(*args, **kwargs)
 
-        if DEBUG:
-            task_get = ast.literal_eval(str(analyzer_by_path(self.image.path)))
-        else:
-            task_get = ast.literal_eval(str(analyzer_by_path.delay(self.image.path).get()))
+        if PROFILE:
+            start = start_time()
+            if DEBUG:
+                task_get = ast.literal_eval(str(analyzer_by_path(self.image.path)))
+            else:
+                task_get = ast.literal_eval(str(analyzer_by_path.delay(self.image.path).get()))
+            self.model_execute_time = end_time(start)
+            start = start_time()
 
-        for result in task_get:
-            self.result.create(values=result)
+            for result in task_get:
+                self.result.create(values=result)
+
+                self.db_save_time = end_time(start)
+
+        else :
+            if DEBUG:
+                task_get = ast.literal_eval(str(analyzer_by_path(self.image.path)))
+            else:
+                task_get = ast.literal_eval(str(analyzer_by_path.delay(self.image.path).get()))
+
+            for result in task_get:
+                self.result.create(values=result)
+
         super(ImageModel, self).save()
 
 
