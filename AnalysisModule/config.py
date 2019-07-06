@@ -4,6 +4,7 @@
 
 DEBUG = True
 PROFILE = True
+MODE = "CCTV" # CCTV or VTT (temporary)
 
 TOTAL_NUMBER_OF_MODULES = 2
 
