@@ -17,8 +17,8 @@ class ImageModel(models.Model):
     token = models.AutoField(primary_key=True)
     uploaded_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-    model_execute_time = models.FloatField(null=True, unique=False)
-    db_save_time = models.FloatField(null=True, unique=False)
+    model_inference_time = models.FloatField(null=True, unique=False)
+    result_save_time = models.FloatField(null=True, unique=False)
 
     def save(self, *args, **kwargs):
         super(ImageModel, self).save(*args, **kwargs)
@@ -26,26 +26,28 @@ class ImageModel(models.Model):
         if PROFILE:
             start = start_time()
             task_get = self.get_task(self.image.path)
-            self.model_execute_time = end_time(start)
+            self.model_inference_time = end_time(start)
 
             start = start_time()
-            for result in task_get:
-                self.result.create(values=result)
-            self.db_save_time = end_time(start)
+            self.create_result(task_get, self.result)
+            self.result_save_time = end_time(start)
 
         else :
             task_get = self.get_task(self.image.path)
-            for result in task_get:
-                self.result.create(values=result)
+            self.create_result(task_get, self.result)
 
         super(ImageModel, self).save()
 
     def get_task(self, image_path):
         if DEBUG:
-            task_get = ast.literal_eval(str(analyzer_by_path(self.image.path)))
+            task_get = ast.literal_eval(str(analyzer_by_path(image_path)))
         else:
-            task_get = ast.literal_eval(str(analyzer_by_path.delay(self.image.path).get()))
+            task_get = ast.literal_eval(str(analyzer_by_path.delay(image_path).get()))
         return task_get
+
+    def create_result(self, task_get, results):
+        for result in task_get:
+            results.create(values=result)
 
 
 class ResultModel(models.Model):
