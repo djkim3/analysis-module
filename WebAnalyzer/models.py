@@ -25,28 +25,27 @@ class ImageModel(models.Model):
 
         if PROFILE:
             start = start_time()
-            if DEBUG:
-                task_get = ast.literal_eval(str(analyzer_by_path(self.image.path)))
-            else:
-                task_get = ast.literal_eval(str(analyzer_by_path.delay(self.image.path).get()))
+            task_get = self.get_task(self.image.path)
             self.model_execute_time = end_time(start)
-            start = start_time()
 
+            start = start_time()
             for result in task_get:
                 self.result.create(values=result)
-
-                self.db_save_time = end_time(start)
+            self.db_save_time = end_time(start)
 
         else :
-            if DEBUG:
-                task_get = ast.literal_eval(str(analyzer_by_path(self.image.path)))
-            else:
-                task_get = ast.literal_eval(str(analyzer_by_path.delay(self.image.path).get()))
-
+            task_get = self.get_task(self.image.path)
             for result in task_get:
                 self.result.create(values=result)
 
         super(ImageModel, self).save()
+
+    def get_task(self, image_path):
+        if DEBUG:
+            task_get = ast.literal_eval(str(analyzer_by_path(image_path)))
+        else:
+            task_get = ast.literal_eval(str(analyzer_by_path.delay(image_path).get()))
+        return task_get
 
 
 class ResultModel(models.Model):
@@ -64,7 +63,7 @@ class ResultModel(models.Model):
         ResultPositionModel.objects.create(result_detail_model=self, x=x, y=y, w=w, h=h)
         for item in self.values[1].items():
             self.label.create(description=item[0], score=float(item[1]))
-        super(ResultModel, self).save()
+        # super(ResultModel, self).save()
 
 
 class ResultPositionModel(models.Model):
