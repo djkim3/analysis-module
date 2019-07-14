@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-	   git wget python-pip apt-utils \
+	   git wget python-pip apt-utils mysql-server libmysqlclient-dev gcc \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip
