@@ -5,7 +5,7 @@ from django.db import models
 
 # Create your models here.
 from rest_framework import exceptions
-from AnalysisModule.config import DEBUG, PROFILE
+from AnalysisModule.config import DEBUG, PROFILE, MODE
 from WebAnalyzer.tasks import analyzer_by_path
 from WebAnalyzer.utils import filename
 from Profile.timer import start_time, end_time
@@ -28,13 +28,15 @@ class ImageModel(models.Model):
             task_get = self.get_task(self.image.path)
             self.model_inference_time = end_time(start)
 
-            start = start_time()
-            self.create_result(task_get, self.result)
-            self.result_save_time = end_time(start)
+            if MODE == "VTT" :
+                start = start_time()
+                self.create_result(task_get, self.result)
+                self.result_save_time = end_time(start)
 
         else :
             task_get = self.get_task(self.image.path)
-            self.create_result(task_get, self.result)
+            if MODE == "VTT" :
+                self.create_result(task_get, self.result)
 
         super(ImageModel, self).save()
 
