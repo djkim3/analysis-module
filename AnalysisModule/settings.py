@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'AnalysisModule.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'analysis-module',
+        'NAME': 'analysismodule',
         'USER': 'root',
         'PASSWORD': 'password',
         'HOST': 'localhost',
