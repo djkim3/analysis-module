@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from AnalysisModule.config import DEBUG
+from AnalysisModule.config import DEBUG, MODE
 from AnalysisModule.celerys import app
 from celery.signals import worker_init, worker_process_init
 from billiard import current_process
@@ -33,7 +33,10 @@ def module_load_init(**__):
 
 @app.task
 def analyzer_by_path(image_path):
-    result = analyzer.inference_by_path(image_path)
+    if MODE == "VTT" :
+        result = analyzer.inference_by_path(image_path)
+    elif MODE == "CCTV" :
+        result = analyzer.send_result_inference_by_path(image_path)
     return result
 
 
